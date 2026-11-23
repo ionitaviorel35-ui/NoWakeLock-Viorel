@@ -1,5 +1,6 @@
 package com.js.nowakelock.ui.screens.apps.components
 
+import androidx.compose.ui.res.stringResource
 import android.content.pm.PackageManager
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
