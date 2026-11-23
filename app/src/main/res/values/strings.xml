@@ -291,4 +291,13 @@
     <string name="config_diagnostics">Configuration and hook diagnostics</string>
     <string name="config_revision_status">Published: %1$s · Read here: %2$s</string>
     <string name="config_pending">Awaiting process confirmation</string>
+
+    <!-- Backend strings -->
+    <string name="backend_xposed">Xposed</string>
+    <string name="backend_shizuku">Shizuku</string>
+    <string name="backend_auto">Auto (Recommended)</string>
+    <string name="privileged_backend">Privileged Backend</string>
+    <string name="privileged_backend_desc">Select privilege backend for system control</string>
+    <string name="backend_xposed_desc">Full per-tag control and detailed statistics. Requires Xposed/LSPosed.</string>
+    <string name="backend_shizuku_desc">App-level wakelock blocking via AppOps, read-only dumpsys inspection. Requires Shizuku.</string>
 </resources>

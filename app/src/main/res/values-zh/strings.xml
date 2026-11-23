@@ -269,4 +269,13 @@
     <string name="config_diagnostics">配置与拦截诊断</string>
     <string name="config_revision_status">已发布：%1$s · 当前进程已读取：%2$s</string>
     <string name="config_pending">等待目标进程确认</string>
+
+    <!-- Backend strings -->
+    <string name="backend_xposed">Xposed</string>
+    <string name="backend_shizuku">Shizuku</string>
+    <string name="backend_auto">自动（推荐）</string>
+    <string name="privileged_backend">特权后端</string>
+    <string name="privileged_backend_desc">选择与系统交互的特权后端</string>
+    <string name="backend_xposed_desc">完整标签级拦截控制与详细统计。需要 Xposed/LSPosed 框架。</string>
+    <string name="backend_shizuku_desc">通过 AppOps 实现按应用唤醒锁拦截，只读 dumpsys 检查。需要 Shizuku。</string>
 </resources>

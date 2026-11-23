@@ -44,6 +44,10 @@ fun appModule() = module {
     single { XposedRemotePreferencesManagers.create() }
     single { ConfigPublisher(get(), get(), get()) }
 
+    // Privileged Backends
+    single { com.js.nowakelock.data.backend.XposedBackend(get()) }
+    single { com.js.nowakelock.data.backend.BackendManager(get(), get(), get()) }
+
     // Repository
     singleOf(::AppDasAR) { bind<AppDasRepo>() }
     singleOf(::BackupRepo)

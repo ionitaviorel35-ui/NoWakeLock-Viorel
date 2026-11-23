@@ -30,6 +30,23 @@ class UserPreferencesRepository(private val context: Context) {
         val RESET_DONE_KEY = booleanPreferencesKey("reset_done_for_current_boot")
         // Key for module check functionality
         val MODULE_CHECK_DONE_KEY = booleanPreferencesKey("module_check_done_for_current_boot")
+        // Key for backend preference
+        val BACKEND_PREFERENCE_KEY = stringPreferencesKey("backend_preference")
+    }
+
+    // Possible backend preference values
+    enum class BackendPreference {
+        AUTO, XPOSED, SHIZUKU;
+
+        companion object {
+            fun fromString(value: String?): BackendPreference {
+                return when (value?.uppercase()) {
+                    "XPOSED" -> XPOSED
+                    "SHIZUKU" -> SHIZUKU
+                    else -> AUTO
+                }
+            }
+        }
     }
 
     // Possible theme values
@@ -118,6 +135,12 @@ class UserPreferencesRepository(private val context: Context) {
             preferences[MODULE_CHECK_DONE_KEY] ?: false 
         }
 
+    // Get backend preference flow - default to AUTO if not set
+    val backendPreference: Flow<BackendPreference> = context.dataStore.data
+        .map { preferences ->
+            BackendPreference.fromString(preferences[BACKEND_PREFERENCE_KEY])
+        }
+
     // Save theme preference
     suspend fun setThemeMode(mode: ThemeMode) {
         context.dataStore.edit { preferences ->
@@ -164,6 +187,13 @@ class UserPreferencesRepository(private val context: Context) {
     suspend fun setModuleCheckDone(done: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[MODULE_CHECK_DONE_KEY] = done
+        }
+    }
+
+    // Save backend preference
+    suspend fun setBackendPreference(preference: BackendPreference) {
+        context.dataStore.edit { preferences ->
+            preferences[BACKEND_PREFERENCE_KEY] = preference.name
         }
     }
 } 
