@@ -111,7 +111,8 @@ fun appModule() = module {
             userPreferencesRepository = get(),
             backupManager = get(),
             context = get(),
-            configPublisher = get()
+            configPublisher = get(),
+            backendManager = get()
         )
     }
 

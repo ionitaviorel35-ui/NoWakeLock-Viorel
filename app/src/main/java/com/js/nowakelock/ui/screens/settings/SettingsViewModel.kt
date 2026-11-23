@@ -59,11 +59,20 @@ open class SettingsViewModel(
     private val userPreferencesRepository: UserPreferencesRepository,
     private val backupManager: BackupManager,
     private val context: Context,
-    private val configPublisher: ConfigPublisher? = null
+    private val configPublisher: ConfigPublisher? = null,
+    private val backendManager: com.js.nowakelock.data.backend.BackendManager? = null
 ) : ViewModel() {
     // UI状态
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
+
+    // Backend preference from repository
+    val backendPreference = userPreferencesRepository.backendPreference
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = UserPreferencesRepository.BackendPreference.AUTO
+        )
 
     // Theme preference from repository
     val themeMode = userPreferencesRepository.themeMode
@@ -133,6 +142,22 @@ open class SettingsViewModel(
         
         // Load initial data time range
         loadDataTimeRange()
+    }
+
+    /**
+     * Update backend preference
+     */
+    fun updateBackendPreference(preference: UserPreferencesRepository.BackendPreference) {
+        viewModelScope.launch {
+            try {
+                userPreferencesRepository.setBackendPreference(preference)
+                backendManager?.setBackendPreference(preference)
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(message = e.message ?: "Error updating backend preference")
+                }
+            }
+        }
     }
 
     /**

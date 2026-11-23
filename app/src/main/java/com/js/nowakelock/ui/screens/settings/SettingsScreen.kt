@@ -25,6 +25,9 @@ import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.Extension
+import androidx.compose.material.icons.filled.Terminal
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -83,10 +86,12 @@ fun SettingsScreen(
     val powerFlag by viewModel.powerFlag.collectAsState()
     val clearFlag by viewModel.clearFlag.collectAsState()
     val debugMode by viewModel.debugMode.collectAsState()
+    val backendPreference by viewModel.backendPreference.collectAsState()
 
     // Dialog states
     var showThemeDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
+    var showBackendDialog by remember { mutableStateOf(false) }
 
     // Snackbar state
     val snackbarHostState = remember { SnackbarHostState() }
@@ -143,6 +148,12 @@ fun SettingsScreen(
                     onShowThemeDialog = { showThemeDialog = true },
                     onShowLanguageDialog = { showLanguageDialog = true }
                 )
+
+                // privileged backend settings area
+                PrivilegedBackendSettings(
+                    backendPreference = backendPreference,
+                    onShowBackendDialog = { showBackendDialog = true }
+                )
                 
                 // data management settings area - encapsulated separately, only when related status changes will it be重组
                 DataManagementSettings(
@@ -192,6 +203,15 @@ fun SettingsScreen(
             currentLanguage = languageMode,
             onLanguageSelected = { viewModel.updateLanguage(it) },
             onDismiss = { showLanguageDialog = false }
+        )
+    }
+
+    // Backend selection dialog
+    if (showBackendDialog) {
+        BackendSelectionDialog(
+            currentPreference = backendPreference,
+            onPreferenceSelected = { viewModel.updateBackendPreference(it) },
+            onDismiss = { showBackendDialog = false }
         )
     }
 }
