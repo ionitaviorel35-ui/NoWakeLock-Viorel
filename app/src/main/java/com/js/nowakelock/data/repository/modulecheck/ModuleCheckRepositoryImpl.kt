@@ -24,10 +24,16 @@ import android.os.Bundle
 class ModuleCheckRepositoryImpl(
     private val context: Context,
     private val userPreferencesRepository: UserPreferencesRepository,
+    private val shizukuBackend: com.js.nowakelock.data.backend.ShizukuBackend? = null,
+    private val backendManager: com.js.nowakelock.data.backend.BackendManager? = null,
     private val remoteManager: XposedRemotePreferencesManager = XposedRemotePreferencesManagers.create()
 ) : ModuleCheckRepository {
     
-    private val moduleCheckManager = ModuleCheckManager(context, userPreferencesRepository)
+    private val moduleCheckManager = ModuleCheckManager(context, userPreferencesRepository, shizukuBackend, backendManager)
+
+    override fun requestShizukuPermission() {
+        shizukuBackend?.requestPermission()
+    }
     override suspend fun reloadCode(): CodeReloadReport = withContext(Dispatchers.IO) {
         val before = try { getCPResult(context, ProviderMethod.CheckHookActive.value, Bundle()) } catch (_: Exception) { null }
         // Framework UP_TO_DATE may only compare versionCode. Two local release builds

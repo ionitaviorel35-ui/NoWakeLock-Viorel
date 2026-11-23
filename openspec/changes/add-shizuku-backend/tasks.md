@@ -7,11 +7,11 @@
 - [x] 1.4 Implement `BackendManager` and wire into Koin DI
 
 ## 2. Shizuku Setup and Status
-- [ ] 2.1 Add Shizuku dependencies and configure AIDL in `app/build.gradle`
-- [ ] 2.2 Declare `ShizukuProvider` and `UserService` in `AndroidManifest.xml`
-- [ ] 2.3 Implement `IUserService.aidl` and `UserService.kt`
-- [ ] 2.4 Implement `ShizukuBackend.kt` handling binder ping, permissions, and command execution
-- [ ] 2.5 Update Module Status Check screen with Shizuku status display
+- [x] 2.1 Add Shizuku dependencies and configure AIDL in `app/build.gradle`
+- [x] 2.2 Declare `ShizukuProvider` and `UserService` in `AndroidManifest.xml`
+- [x] 2.3 Implement `IUserService.aidl` and `UserService.kt`
+- [x] 2.4 Implement `ShizukuBackend.kt` handling binder ping, permissions, and command execution
+- [x] 2.5 Update Module Status Check screen with Shizuku status display
 
 ## 3. App List with Wakelock Toggle (AppOps)
 - [ ] 3.1 Implement AppOps WAKE_LOCK read/write commands in `ShizukuBackend`

@@ -51,6 +51,7 @@ android {
     buildFeatures {
         buildConfig true
         compose true
+        aidl true
     }
 
     testOptions {
@@ -124,6 +125,11 @@ dependencies {
     compileOnly 'io.github.libxposed:api:102.0.0'
     testImplementation 'io.github.libxposed:api:102.0.0'
     implementation 'io.github.libxposed:service:102.0.0'
+
+    // Shizuku
+    def shizuku_version = '13.1.5'
+    implementation "dev.rikka.shizuku:api:$shizuku_version"
+    implementation "dev.rikka.shizuku:provider:$shizuku_version"
 
     // Immutable collections for better performance
     implementation 'org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.8'

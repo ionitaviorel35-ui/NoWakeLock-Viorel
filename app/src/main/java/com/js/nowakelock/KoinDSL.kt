@@ -46,7 +46,8 @@ fun appModule() = module {
 
     // Privileged Backends
     single { com.js.nowakelock.data.backend.XposedBackend(get()) }
-    single { com.js.nowakelock.data.backend.BackendManager(get(), get(), get()) }
+    single { com.js.nowakelock.data.backend.ShizukuBackend(get()) }
+    single { com.js.nowakelock.data.backend.BackendManager(get(), get(), get(), get<com.js.nowakelock.data.backend.ShizukuBackend>()) }
 
     // Repository
     singleOf(::AppDasAR) { bind<AppDasRepo>() }
@@ -66,7 +67,7 @@ fun appModule() = module {
     single<DADetailRepository> { DADetailRepositoryImpl(get(), get(), get()) }
     
     // Module check repository
-    single<ModuleCheckRepository> { ModuleCheckRepositoryImpl(get(), get()) }
+    single<ModuleCheckRepository> { ModuleCheckRepositoryImpl(get(), get(), get<com.js.nowakelock.data.backend.ShizukuBackend>(), get<com.js.nowakelock.data.backend.BackendManager>()) }
 
     // ViewModel
     viewModel(named("WakelockViewModel")) {

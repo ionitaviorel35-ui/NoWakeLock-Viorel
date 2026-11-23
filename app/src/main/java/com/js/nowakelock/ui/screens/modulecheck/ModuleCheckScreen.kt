@@ -87,6 +87,7 @@ fun ModuleCheckScreen(
                         reloading = uiState.reloading,
                         reloadReport = uiState.reloadReport,
                         onReload = viewModel::reloadCode,
+                        onRequestShizukuPermission = viewModel::requestShizukuPermission,
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(horizontal = 16.dp, vertical = 16.dp)
@@ -106,7 +107,8 @@ fun ModuleCheckContent(
     modifier: Modifier = Modifier,
     reloading: Boolean = false,
     reloadReport: com.js.nowakelock.data.config.CodeReloadReport? = null,
-    onReload: () -> Unit = {}
+    onReload: () -> Unit = {},
+    onRequestShizukuPermission: () -> Unit = {}
 ) {
     Column(
         modifier = modifier
@@ -114,10 +116,20 @@ fun ModuleCheckContent(
     ) {
         // Overall status card
         OverallStatusCard(
-            status = result.overallStatus,
+            result = result,
             modifier = Modifier.fillMaxWidth()
         )
         
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Shizuku status card
+        ShizukuStatusCard(
+            isShizukuRunning = result.shizukuRunning,
+            isPermissionGranted = result.shizukuPermissionGranted,
+            onRequestPermission = onRequestShizukuPermission,
+            modifier = Modifier.fillMaxWidth()
+        )
+
         Spacer(modifier = Modifier.height(16.dp))
         
         // Module status card
@@ -164,9 +176,12 @@ fun ModuleCheckContent(
  */
 @Composable
 fun OverallStatusCard(
-    status: CheckStatus,
+    result: ModuleCheckResult,
     modifier: Modifier = Modifier
 ) {
+    val status = result.overallStatus
+    val isShizuku = result.activeBackendType == com.js.nowakelock.data.backend.BackendType.SHIZUKU
+
     val (color, icon, title) = when (status) {
         CheckStatus.NORMAL -> Triple(
             MaterialTheme.colorScheme.primary,
@@ -205,6 +220,17 @@ fun OverallStatusCard(
                     text = stringResource(R.string.overall_status),
                     style = MaterialTheme.typography.titleMedium
                 )
+                Spacer(modifier = Modifier.weight(1f))
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = MaterialTheme.shapes.small
+                ) {
+                    Text(
+                        text = if (isShizuku) "Shizuku" else "Xposed",
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
             }
             
             Spacer(modifier = Modifier.height(8.dp))
@@ -217,16 +243,127 @@ fun OverallStatusCard(
             
             Spacer(modifier = Modifier.height(8.dp))
             
-            val description = when (status) {
-                CheckStatus.NORMAL -> stringResource(R.string.status_normal_description)
-                CheckStatus.WARNING -> stringResource(R.string.status_warning_description)
-                CheckStatus.ERROR -> stringResource(R.string.status_error_description)
+            val description = if (isShizuku) {
+                when {
+                    result.shizukuRunning && result.shizukuPermissionGranted -> stringResource(R.string.status_shizuku_ready)
+                    result.shizukuRunning && !result.shizukuPermissionGranted -> stringResource(R.string.status_shizuku_perm_missing)
+                    else -> stringResource(R.string.status_shizuku_not_running)
+                }
+            } else {
+                when (status) {
+                    CheckStatus.NORMAL -> stringResource(R.string.status_normal_description)
+                    CheckStatus.WARNING -> stringResource(R.string.status_warning_description)
+                    CheckStatus.ERROR -> stringResource(R.string.status_error_description)
+                }
             }
             
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodyMedium
             )
+        }
+    }
+}
+
+/**
+ * Card displaying Shizuku status
+ */
+@Composable
+fun ShizukuStatusCard(
+    isShizukuRunning: Boolean,
+    isPermissionGranted: Boolean,
+    onRequestPermission: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(modifier = modifier) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = stringResource(R.string.shizuku_status_title),
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Service status
+            val (serviceIcon, serviceText, serviceColor) = if (isShizukuRunning) {
+                Triple(
+                    Icons.Default.CheckCircle,
+                    stringResource(R.string.shizuku_service_running),
+                    MaterialTheme.colorScheme.primary
+                )
+            } else {
+                Triple(
+                    Icons.Default.Cancel,
+                    stringResource(R.string.shizuku_service_not_running),
+                    MaterialTheme.colorScheme.error
+                )
+            }
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = serviceIcon,
+                    contentDescription = null,
+                    tint = serviceColor,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = serviceText,
+                    color = serviceColor,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Permission status
+            val (permIcon, permText, permColor) = if (isPermissionGranted) {
+                Triple(
+                    Icons.Default.CheckCircle,
+                    stringResource(R.string.shizuku_permission_granted),
+                    MaterialTheme.colorScheme.primary
+                )
+            } else {
+                Triple(
+                    Icons.Default.Cancel,
+                    stringResource(R.string.shizuku_permission_missing),
+                    if (isShizukuRunning) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.outline
+                )
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    imageVector = permIcon,
+                    contentDescription = null,
+                    tint = permColor,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = permText,
+                    color = permColor,
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.weight(1f)
+                )
+
+                if (isShizukuRunning && !isPermissionGranted) {
+                    Button(onClick = onRequestPermission) {
+                        Text(stringResource(R.string.shizuku_request_permission))
+                    }
+                }
+            }
+
+            if (!isShizukuRunning) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = stringResource(R.string.shizuku_not_running_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }

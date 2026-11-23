@@ -45,6 +45,11 @@ class ModuleCheckViewModel(
             finally { _uiState.update { it.copy(reloading = false) } }
         }
     }
+
+    fun requestShizukuPermission() {
+        moduleCheckRepository.requestShizukuPermission()
+        checkModuleStatus()
+    }
     
     init {
         checkModuleStatus()

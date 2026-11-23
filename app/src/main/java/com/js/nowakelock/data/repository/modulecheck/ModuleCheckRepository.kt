@@ -13,4 +13,5 @@ interface ModuleCheckRepository {
      */
     fun checkModuleStatus(): Flow<ModuleCheckResult>
     suspend fun reloadCode(): com.js.nowakelock.data.config.CodeReloadReport
+    fun requestShizukuPermission()
 }

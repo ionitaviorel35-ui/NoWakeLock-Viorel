@@ -12,7 +12,10 @@ data class ModuleCheckResult(
     val hookStatus: Map<Type, Boolean>, // Status of each hook type (Wakelock, Alarm, Service)
     val configPathValid: Boolean,
     val configBackendStatus: ConfigBackendStatus,
-    val overallStatus: CheckStatus // Overall status determined from component statuses
+    val overallStatus: CheckStatus, // Overall status determined from component statuses
+    val shizukuRunning: Boolean = false,
+    val shizukuPermissionGranted: Boolean = false,
+    val activeBackendType: com.js.nowakelock.data.backend.BackendType = com.js.nowakelock.data.backend.BackendType.XPOSED
 ) {
     companion object {
         /**
@@ -30,15 +33,28 @@ data class ModuleCheckResult(
                 hookStatus = emptyHookStatus,
                 configPathValid = false,
                 configBackendStatus = ConfigBackendStatus(),
-                overallStatus = CheckStatus.ERROR
+                overallStatus = CheckStatus.ERROR,
+                shizukuRunning = false,
+                shizukuPermissionGranted = false,
+                activeBackendType = com.js.nowakelock.data.backend.BackendType.XPOSED
             )
         }
 
         fun determineOverallStatus(
             moduleActive: Boolean,
             hookStatus: Map<Type, Boolean>,
-            configBackendStatus: ConfigBackendStatus
+            configBackendStatus: ConfigBackendStatus,
+            activeBackendType: com.js.nowakelock.data.backend.BackendType = com.js.nowakelock.data.backend.BackendType.XPOSED,
+            shizukuRunning: Boolean = false,
+            shizukuPermissionGranted: Boolean = false
         ): CheckStatus {
+            if (activeBackendType == com.js.nowakelock.data.backend.BackendType.SHIZUKU) {
+                return when {
+                    shizukuRunning && shizukuPermissionGranted -> CheckStatus.NORMAL
+                    shizukuRunning && !shizukuPermissionGranted -> CheckStatus.WARNING
+                    else -> CheckStatus.ERROR
+                }
+            }
             return when {
                 !moduleActive || !configBackendStatus.backendAvailable -> CheckStatus.ERROR
                 configBackendStatus.remoteReadable && !configBackendStatus.synchronizationConfirmed -> CheckStatus.WARNING

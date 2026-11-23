@@ -278,4 +278,17 @@
     <string name="privileged_backend_desc">选择与系统交互的特权后端</string>
     <string name="backend_xposed_desc">完整标签级拦截控制与详细统计。需要 Xposed/LSPosed 框架。</string>
     <string name="backend_shizuku_desc">通过 AppOps 实现按应用唤醒锁拦截，只读 dumpsys 检查。需要 Shizuku。</string>
+
+    <!-- Shizuku status strings -->
+    <string name="shizuku_status_title">Shizuku 状态</string>
+    <string name="shizuku_service_running">Shizuku 服务运行中</string>
+    <string name="shizuku_service_not_running">Shizuku 服务未运行</string>
+    <string name="shizuku_permission_granted">已授予权限</string>
+    <string name="shizuku_permission_missing">未授予权限</string>
+    <string name="shizuku_request_permission">授权</string>
+    <string name="shizuku_not_running_hint">请在 Shizuku 应用中通过无线调试或 Root 启动服务。</string>
+    <string name="active_backend_title">当前活跃后端：%s</string>
+    <string name="status_shizuku_ready">Shizuku 后端已就绪并正常工作</string>
+    <string name="status_shizuku_perm_missing">Shizuku 正在运行，但尚未获取授权</string>
+    <string name="status_shizuku_not_running">Shizuku 未运行，请先启动 Shizuku</string>
 </resources>

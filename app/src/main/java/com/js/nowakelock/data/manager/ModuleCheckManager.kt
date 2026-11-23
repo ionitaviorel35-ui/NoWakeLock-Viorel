@@ -21,7 +21,9 @@ import kotlinx.coroutines.runBlocking
  */
 class ModuleCheckManager(
     private val context: Context,
-    private val userPreferencesRepository: UserPreferencesRepository
+    private val userPreferencesRepository: UserPreferencesRepository,
+    private val shizukuBackend: com.js.nowakelock.data.backend.ShizukuBackend? = null,
+    private val backendManager: com.js.nowakelock.data.backend.BackendManager? = null
 ) {
     companion object {
         private const val TAG = "ModuleCheckManager"
@@ -88,12 +90,18 @@ class ModuleCheckManager(
         )
         val configBackendStatus = checkConfigBackendStatus()
         val configPathValid = configBackendStatus.backendAvailable
+        val shizukuRunning = shizukuBackend?.isShizukuRunning() ?: false
+        val shizukuPermission = shizukuBackend?.isPermissionGranted() ?: false
+        val activeBackendType = backendManager?.getActiveBackend()?.type ?: com.js.nowakelock.data.backend.BackendType.XPOSED
         
         // Determine overall status based on component statuses
         val overallStatus = ModuleCheckResult.determineOverallStatus(
             moduleActive = moduleActive,
             hookStatus = hookStatus,
-            configBackendStatus = configBackendStatus
+            configBackendStatus = configBackendStatus,
+            activeBackendType = activeBackendType,
+            shizukuRunning = shizukuRunning,
+            shizukuPermissionGranted = shizukuPermission
         )
         
         return ModuleCheckResult(
@@ -102,7 +110,10 @@ class ModuleCheckManager(
             hookStatus = hookStatus,
             configPathValid = configPathValid,
             configBackendStatus = configBackendStatus,
-            overallStatus = overallStatus
+            overallStatus = overallStatus,
+            shizukuRunning = shizukuRunning,
+            shizukuPermissionGranted = shizukuPermission,
+            activeBackendType = activeBackendType
         )
     }
     

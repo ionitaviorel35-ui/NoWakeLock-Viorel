@@ -300,4 +300,17 @@
     <string name="privileged_backend_desc">Select privilege backend for system control</string>
     <string name="backend_xposed_desc">Full per-tag control and detailed statistics. Requires Xposed/LSPosed.</string>
     <string name="backend_shizuku_desc">App-level wakelock blocking via AppOps, read-only dumpsys inspection. Requires Shizuku.</string>
+
+    <!-- Shizuku status strings -->
+    <string name="shizuku_status_title">Shizuku Status</string>
+    <string name="shizuku_service_running">Shizuku service is running</string>
+    <string name="shizuku_service_not_running">Shizuku service is not running</string>
+    <string name="shizuku_permission_granted">Permission granted</string>
+    <string name="shizuku_permission_missing">Permission missing</string>
+    <string name="shizuku_request_permission">Authorize</string>
+    <string name="shizuku_not_running_hint">Start Shizuku from the Shizuku app via Wireless Debugging or Root.</string>
+    <string name="active_backend_title">Active backend: %s</string>
+    <string name="status_shizuku_ready">Shizuku backend is ready and operational</string>
+    <string name="status_shizuku_perm_missing">Shizuku is running, but permission has not been granted</string>
+    <string name="status_shizuku_not_running">Shizuku is not running. Start Shizuku to use this backend</string>
 </resources>
