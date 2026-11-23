@@ -62,8 +62,11 @@ fun DAsScreen(
     LaunchedEffect(Unit) {
         val refreshHandler: (TopAppBarEvent) -> Unit = { event ->
             if (event is TopAppBarEvent.RefreshClicked) {
-                // Call the viewModel's refresh method
-                viewModel.refreshData()
+                if (uiState.isShizukuMode) {
+                    viewModel.loadDumpsysData(type)
+                } else {
+                    viewModel.refreshData()
+                }
             }
             // Forward the event to the original handler
             onTopAppBarEvent(event)
@@ -71,6 +74,22 @@ fun DAsScreen(
         
         // Set up the refresh handler
         refreshHandler(TopAppBarEvent.RefreshClicked)
+    }
+
+    LaunchedEffect(type, uiState.isShizukuMode) {
+        if (uiState.isShizukuMode) {
+            viewModel.loadDumpsysData(type)
+        }
+    }
+
+    if (uiState.isShizukuMode) {
+        com.js.nowakelock.ui.screens.das.components.DumpsysListView(
+            type = type,
+            groups = uiState.dumpsysGroups,
+            isLoading = uiState.isDumpsysLoading,
+            onRefresh = { viewModel.loadDumpsysData(type) }
+        )
+        return
     }
 
     // Top app bar scrolling behavior 

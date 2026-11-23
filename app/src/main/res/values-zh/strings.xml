@@ -298,4 +298,11 @@
     <string name="block_wakelock_warning_message">通过 AppOps 限制唤醒锁可能导致 %1$s 无法在后台正常运行。媒体播放、地图导航或即时通讯消息推送可能异常。确定要阻止该应用的唤醒锁吗？</string>
     <string name="block_confirm">阻止</string>
     <string name="shizuku_mode_banner">Shizuku 模式：按应用 AppOps 唤醒锁控制</string>
+
+    <!-- Dumpsys viewer strings -->
+    <string name="shizuku_dumpsys_wakelock_banner">Shizuku 模式（只读）：显示来自 dumpsys power 的当前活跃唤醒锁。标签级拦截与历史统计需要 Xposed。</string>
+    <string name="shizuku_dumpsys_alarm_banner">Shizuku 模式（只读）：显示来自 dumpsys alarm 的当前活跃定时唤醒。定时拦截需要 Xposed。</string>
+    <string name="shizuku_service_disabled_title">服务拦截需要 Xposed</string>
+    <string name="shizuku_service_disabled_desc">监听与拦截后台服务运行依赖 Xposed 系统级 Hook 框架。此功能在 Shizuku 模式下不可用。</string>
+    <string name="no_active_dumpsys">dumpsys 中当前未检测到活跃项</string>
 </resources>

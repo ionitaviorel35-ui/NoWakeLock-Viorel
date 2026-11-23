@@ -75,7 +75,10 @@ data class DAsUiState(
     val allowedCount: Int = 0,
     // App filtering
     val packageName: String? = null,
-    val userId: Int? = null
+    val userId: Int? = null,
+    val isShizukuMode: Boolean = false,
+    val dumpsysGroups: List<com.js.nowakelock.data.model.AppDumpsysGroup> = emptyList(),
+    val isDumpsysLoading: Boolean = false
 )
 
 /**
@@ -84,7 +87,10 @@ data class DAsUiState(
  * Also manages DA settings updates
  */
 open class DAsViewModel(
-    private val daRepository: DARepository, private val savedStateHandle: SavedStateHandle
+    private val daRepository: DARepository,
+    private val savedStateHandle: SavedStateHandle,
+    private val backendManager: com.js.nowakelock.data.backend.BackendManager? = null,
+    private val context: android.content.Context? = null
 ) : ViewModel() {
 
     // read arguments from savedStateHandle
@@ -148,6 +154,13 @@ open class DAsViewModel(
     init {
         // Initial data load from local database only
         triggerDataLoad(LoadingSource.INITIAL, immediate = true)
+
+        viewModelScope.launch {
+            backendManager?.activeBackend?.collect { backend ->
+                val isShizuku = backend.type == com.js.nowakelock.data.backend.BackendType.SHIZUKU
+                _uiState.update { it.copy(isShizukuMode = isShizuku) }
+            }
+        }
     }
 
     /**
@@ -431,4 +444,47 @@ open class DAsViewModel(
         }
     }
 
+    fun loadDumpsysData(type: Type) {
+        val backend = backendManager?.getActiveBackend() ?: return
+        val ctx = context ?: return
+        viewModelScope.launch(Dispatchers.IO) {
+            _uiState.update { it.copy(isDumpsysLoading = true) }
+            try {
+                when (type) {
+                    Type.Wakelock -> {
+                        val raw = backend.getDumpsysPower()
+                        val parsed = com.js.nowakelock.data.backend.DumpsysParser.parsePower(raw, ctx)
+                        val grouped = com.js.nowakelock.data.backend.DumpsysParser.groupWakelocks(parsed, ctx)
+                        _uiState.update { it.copy(dumpsysGroups = filterDumpsys(grouped), isDumpsysLoading = false) }
+                    }
+                    Type.Alarm -> {
+                        val raw = backend.getDumpsysAlarm()
+                        val parsed = com.js.nowakelock.data.backend.DumpsysParser.parseAlarm(raw, ctx)
+                        val grouped = com.js.nowakelock.data.backend.DumpsysParser.groupAlarms(parsed, ctx)
+                        _uiState.update { it.copy(dumpsysGroups = filterDumpsys(grouped), isDumpsysLoading = false) }
+                    }
+                    else -> {
+                        _uiState.update { it.copy(dumpsysGroups = emptyList(), isDumpsysLoading = false) }
+                    }
+                }
+            } catch (e: Exception) {
+                LogUtil.e("DAsViewModel", "Error loading dumpsys: ${e.message}")
+                _uiState.update { it.copy(isDumpsysLoading = false) }
+            }
+        }
+    }
+
+    private fun filterDumpsys(groups: List<com.js.nowakelock.data.model.AppDumpsysGroup>): List<com.js.nowakelock.data.model.AppDumpsysGroup> {
+        val query = searchQuery.trim().lowercase()
+        return if (query.isEmpty()) {
+            groups
+        } else {
+            groups.filter {
+                it.appLabel.lowercase().contains(query) ||
+                    it.packageName.lowercase().contains(query) ||
+                    it.wakelocks.any { w -> w.tag.lowercase().contains(query) } ||
+                    it.alarms.any { a -> a.tag.lowercase().contains(query) }
+            }
+        }
+    }
 }

@@ -320,4 +320,11 @@
     <string name="block_wakelock_warning_message">Restricting wakelocks via AppOps may prevent %1$s from running properly in the background. Audio/media playback, navigation, and messaging notifications may break. Are you sure you want to proceed?</string>
     <string name="block_confirm">Block</string>
     <string name="shizuku_mode_banner">Shizuku Mode: App-level AppOps wakelock control</string>
+
+    <!-- Dumpsys viewer strings -->
+    <string name="shizuku_dumpsys_wakelock_banner">Shizuku Mode (Read-only): Showing active wakelocks from dumpsys power. Per-tag blocking and historical statistics require Xposed.</string>
+    <string name="shizuku_dumpsys_alarm_banner">Shizuku Mode (Read-only): Showing active alarms from dumpsys alarm. Alarm blocking requires Xposed.</string>
+    <string name="shizuku_service_disabled_title">Service Control Requires Xposed</string>
+    <string name="shizuku_service_disabled_desc">Monitoring and blocking background services requires Xposed system framework hooks. This feature is not available in Shizuku mode.</string>
+    <string name="no_active_dumpsys">No active items currently detected in dumpsys</string>
 </resources>

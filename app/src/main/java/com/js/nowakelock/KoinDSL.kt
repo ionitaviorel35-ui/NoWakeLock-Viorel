@@ -73,21 +73,27 @@ fun appModule() = module {
     viewModel(named("WakelockViewModel")) {
         DAsViewModel(
             daRepository = get<WakelockRepositoryImpl>(),
-            savedStateHandle = get()
+            savedStateHandle = get(),
+            backendManager = get(),
+            context = get()
         )
     }
 
     viewModel(named("AlarmViewModel")) {
         DAsViewModel(
             daRepository = get<AlarmRepositoryImpl>(),
-            savedStateHandle = get()
+            savedStateHandle = get(),
+            backendManager = get(),
+            context = get()
         )
     }
 
     viewModel(named("ServiceViewModel")) {
         DAsViewModel(
             daRepository = get<ServiceRepositoryImpl>(),
-            savedStateHandle = get()
+            savedStateHandle = get(),
+            backendManager = get(),
+            context = get()
         )
     }
 

@@ -19,9 +19,9 @@
 - [x] 3.3 Add safety confirmation warning dialog before blocking wakelocks
 
 ## 4. Dumpsys Viewer
-- [ ] 4.1 Parse active wakelocks and alarms from `dumpsys power` and `dumpsys alarm`
-- [ ] 4.2 Group dumpsys data by application
-- [ ] 4.3 Add UI viewer for active wakelocks and alarms in Shizuku mode
+- [x] 4.1 Parse active wakelocks and alarms from `dumpsys power` and `dumpsys alarm`
+- [x] 4.2 Group dumpsys data by application
+- [x] 4.3 Add UI viewer for active wakelocks and alarms in Shizuku mode
 
 ## 5. UI Polishing, Texts and Docs
 - [ ] 5.1 Add backend selector in SettingsScreen
