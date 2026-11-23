@@ -14,9 +14,9 @@
 - [x] 2.5 Update Module Status Check screen with Shizuku status display
 
 ## 3. App List with Wakelock Toggle (AppOps)
-- [ ] 3.1 Implement AppOps WAKE_LOCK read/write commands in `ShizukuBackend`
-- [ ] 3.2 Update Apps screen and AppListItem to support per-app wakelock blocking toggle
-- [ ] 3.3 Add safety confirmation warning dialog before blocking wakelocks
+- [x] 3.1 Implement AppOps WAKE_LOCK read/write commands in `ShizukuBackend`
+- [x] 3.2 Update Apps screen and AppListItem to support per-app wakelock blocking toggle
+- [x] 3.3 Add safety confirmation warning dialog before blocking wakelocks
 
 ## 4. Dumpsys Viewer
 - [ ] 4.1 Parse active wakelocks and alarms from `dumpsys power` and `dumpsys alarm`

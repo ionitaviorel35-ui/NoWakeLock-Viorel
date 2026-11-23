@@ -37,6 +37,9 @@ import com.js.nowakelock.data.model.AppWithStats
 @Composable
 fun AppListItem(
     appWithStats: AppWithStats,
+    isShizukuMode: Boolean = false,
+    isWakelockBlocked: Boolean = false,
+    onBlockToggle: (Boolean) -> Unit = {},
     onItemClick: (AppWithStats) -> Unit
 ) {
     val context = LocalContext.current
@@ -195,6 +198,24 @@ fun AppListItem(
                             )
                         }
                     }
+                }
+            }
+
+            if (isShizukuMode) {
+                Column(
+                    horizontalAlignment = Alignment.End,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.padding(start = 8.dp)
+                ) {
+                    Switch(
+                        checked = isWakelockBlocked,
+                        onCheckedChange = onBlockToggle
+                    )
+                    Text(
+                        text = stringResource(if (isWakelockBlocked) R.string.menu_filter_blocked else R.string.allow),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (isWakelockBlocked) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
         }

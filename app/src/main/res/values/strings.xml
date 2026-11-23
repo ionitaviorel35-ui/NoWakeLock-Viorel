@@ -313,4 +313,11 @@
     <string name="status_shizuku_ready">Shizuku backend is ready and operational</string>
     <string name="status_shizuku_perm_missing">Shizuku is running, but permission has not been granted</string>
     <string name="status_shizuku_not_running">Shizuku is not running. Start Shizuku to use this backend</string>
+
+    <!-- AppOps wakelock strings -->
+    <string name="block_wakelock">Block wakelocks</string>
+    <string name="block_wakelock_warning_title">Block Wakelocks for %1$s?</string>
+    <string name="block_wakelock_warning_message">Restricting wakelocks via AppOps may prevent %1$s from running properly in the background. Audio/media playback, navigation, and messaging notifications may break. Are you sure you want to proceed?</string>
+    <string name="block_confirm">Block</string>
+    <string name="shizuku_mode_banner">Shizuku Mode: App-level AppOps wakelock control</string>
 </resources>

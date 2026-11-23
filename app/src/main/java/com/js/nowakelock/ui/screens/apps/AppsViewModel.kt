@@ -40,7 +40,10 @@ data class AppsUiState(
     val searchQuery: String = "",
     val isSearchActive: Boolean = false,
     val currentUserId: Int = 0,
-    val message: String = ""
+    val message: String = "",
+    val isShizukuMode: Boolean = false,
+    val appOpsBlockedMap: Map<String, Boolean> = emptyMap(),
+    val pendingBlockApp: AppWithStats? = null
 )
 
 /**
@@ -65,7 +68,8 @@ enum class FilterOption {
  */
 class AppsViewModel(
     private val appDasRepo: AppDasRepo,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    private val backendManager: com.js.nowakelock.data.backend.BackendManager? = null
 ) : ViewModel() {
     // 从SavedStateHandle读取参数
     private var currentUserId: Int
@@ -110,6 +114,16 @@ class AppsViewModel(
         viewModelScope.launch {
             delay(300) // 短暂延迟，让UI先渲染
             refreshData(LoadingSource.INITIAL) // 同步系统数据
+        }
+
+        viewModelScope.launch {
+            backendManager?.activeBackend?.collect { backend ->
+                val isShizuku = backend.type == com.js.nowakelock.data.backend.BackendType.SHIZUKU
+                _uiState.update { it.copy(isShizukuMode = isShizuku) }
+                if (isShizuku) {
+                    loadAppOpsStates()
+                }
+            }
         }
     }
     
@@ -170,6 +184,9 @@ class AppsViewModel(
                             loadingSource = LoadingSource.NONE,
                             apps = filterApps(appsList)
                         )
+                    }
+                    if (_uiState.value.isShizukuMode) {
+                        loadAppOpsStates()
                     }
                 }
         } catch (e: CancellationException) {
@@ -281,6 +298,9 @@ class AppsViewModel(
                 
                 // 使用 triggerDataLoad 替代直接调用 loadApps，立即加载
                 triggerDataLoad(source, immediate = true)
+                if (_uiState.value.isShizukuMode) {
+                    loadAppOpsStates()
+                }
             } catch (e: Exception) {
                 LogUtil.e("AppsViewModel", "Error refreshing data: ${e.message}")
                 _uiState.update { 
@@ -291,6 +311,68 @@ class AppsViewModel(
                     )
                 }
             }
+        }
+    }
+
+    fun onToggleAppWakelockBlock(app: AppWithStats, block: Boolean) {
+        if (block) {
+            _uiState.update { it.copy(pendingBlockApp = app) }
+        } else {
+            setAppWakelockBlocked(app, false)
+        }
+    }
+
+    fun dismissBlockWarning() {
+        _uiState.update { it.copy(pendingBlockApp = null) }
+    }
+
+    fun confirmBlockWakelock(app: AppWithStats) {
+        _uiState.update { it.copy(pendingBlockApp = null) }
+        setAppWakelockBlocked(app, true)
+    }
+
+    private fun setAppWakelockBlocked(app: AppWithStats, blocked: Boolean) {
+        val backend = backendManager?.getActiveBackend() ?: return
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            val pkg = app.appInfo.packageName
+            val result = backend.setWakelockAppOp(pkg, blocked, app.appInfo.userId)
+            if (result.isSuccess) {
+                val verified = backend.getWakelockAppOp(pkg, app.appInfo.userId)
+                _uiState.update {
+                    it.copy(appOpsBlockedMap = it.appOpsBlockedMap + (pkg to verified))
+                }
+            } else {
+                _uiState.update {
+                    it.copy(message = "Failed to update ${app.appInfo.label}: ${result.exceptionOrNull()?.message}")
+                }
+            }
+        }
+    }
+
+    fun loadAppOpsStates() {
+        val backend = backendManager?.getActiveBackend() ?: return
+        if (!backend.supportsAppOpsBlocking()) return
+
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            val apps = _uiState.value.apps
+            val blockedMap = mutableMapOf<String, Boolean>()
+            if (backend is com.js.nowakelock.data.backend.ShizukuBackend) {
+                val queryResult = backend.executeCommand("cmd appops query-op WAKE_LOCK ignore")
+                if (queryResult.isSuccess) {
+                    val output = queryResult.getOrNull() ?: ""
+                    for (app in apps) {
+                        val pkg = app.appInfo.packageName
+                        blockedMap[pkg] = output.contains(pkg)
+                    }
+                    _uiState.update { it.copy(appOpsBlockedMap = blockedMap) }
+                    return@launch
+                }
+            }
+            for (app in apps) {
+                val pkg = app.appInfo.packageName
+                blockedMap[pkg] = backend.getWakelockAppOp(pkg, app.appInfo.userId)
+            }
+            _uiState.update { it.copy(appOpsBlockedMap = blockedMap) }
         }
     }
 }

@@ -94,7 +94,8 @@ fun appModule() = module {
     viewModel {
         AppsViewModel(
             appDasRepo = get(),
-            savedStateHandle = get()
+            savedStateHandle = get(),
+            backendManager = get()
         )
     }
 

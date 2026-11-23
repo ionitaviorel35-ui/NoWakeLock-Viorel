@@ -3,7 +3,11 @@ package com.js.nowakelock.ui.screens.apps
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -15,7 +19,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.js.nowakelock.R
 import com.js.nowakelock.data.model.AppWithStats
 import com.js.nowakelock.ui.components.TopAppBarEvent
 import com.js.nowakelock.ui.screens.apps.components.AppListItem
@@ -153,12 +159,48 @@ fun AppsScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(bottom = 8.dp)
                     ) {
+                        if (uiState.isShizukuMode) {
+                            item {
+                                Surface(
+                                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
+                                    shape = RoundedCornerShape(12.dp),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp, vertical = 6.dp)
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.padding(12.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Info,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = stringResource(R.string.shizuku_mode_banner),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
                         items(
                             items = uiState.apps,
                             key = { "${it.appInfo.packageName}_${it.appInfo.userId}" }
                         ) { app ->
+                            val isBlocked = uiState.appOpsBlockedMap[app.appInfo.packageName] ?: false
                             AppListItem(
                                 appWithStats = app,
+                                isShizukuMode = uiState.isShizukuMode,
+                                isWakelockBlocked = isBlocked,
+                                onBlockToggle = { shouldBlock ->
+                                    viewModel.onToggleAppWakelockBlock(app, shouldBlock)
+                                },
                                 onItemClick = {
                                     onAppClick(it)
                                     navigateToAppDetail(it.appInfo.packageName, it.appInfo.label)
@@ -188,6 +230,46 @@ fun AppsScreen(
                     contentColor = MaterialTheme.colorScheme.primary
                 )
             }
+        }
+
+        // Warning dialog before blocking wakelocks for an app
+        if (uiState.pendingBlockApp != null) {
+            val app = uiState.pendingBlockApp!!
+            AlertDialog(
+                onDismissRequest = { viewModel.dismissBlockWarning() },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.Warning,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                },
+                title = {
+                    Text(
+                        text = stringResource(R.string.block_wakelock_warning_title, app.appInfo.label),
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                },
+                text = {
+                    Text(
+                        text = stringResource(R.string.block_wakelock_warning_message, app.appInfo.label),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                },
+                confirmButton = {
+                    Button(
+                        onClick = { viewModel.confirmBlockWakelock(app) },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                    ) {
+                        Text(stringResource(R.string.block_confirm))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { viewModel.dismissBlockWarning() }) {
+                        Text(stringResource(R.string.cancel))
+                    }
+                }
+            )
         }
     }
 }
